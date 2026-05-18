@@ -1115,26 +1115,54 @@
             };
 
             // --- DASHBOARD (REPORTE EN PANTALLA) ---
+            function esHoy(fechaStr) {
+                if (!fechaStr) return false;
+                const parts = fechaStr.split(/[\/\-\s:]/);
+                if (parts.length < 3) return false;
+                const today = new Date();
+                const d = today.getDate();
+                const m = today.getMonth() + 1;
+                const y = today.getFullYear();
+                let parsedDay, parsedMonth, parsedYear;
+                if (parts[0].length === 4) {
+                    parsedYear = parseInt(parts[0]);
+                    parsedMonth = parseInt(parts[1]);
+                    parsedDay = parseInt(parts[2]);
+                } else {
+                    parsedDay = parseInt(parts[0]);
+                    parsedMonth = parseInt(parts[1]);
+                    parsedYear = parseInt(parts[2]);
+                }
+                return parsedDay === d && parsedMonth === m && parsedYear === y;
+            }
+
             async function fetchDashboardStats() {
+                const hoyStr = new Date().toLocaleDateString('es-ES');
+
+                let totalFormulaMl = 0;
+                let formulaCount = 0;
+                let totalPechoMin = 0;
+                let pechoCount = 0;
+
+                let pipiCount = 0;
+                let popoCount = 0;
+                let ambosPanalesCount = 0;
+
+                let saludEvents = [];
+
+                // Cola offline local para sumar registros en vivo temporales
+                let queue = [];
                 try {
-                    const hoyStr = new Date().toLocaleDateString('es-ES');
+                    queue = JSON.parse(localStorage.getItem('babyOfflineQueue') || "[]");
+                } catch(e) {}
 
-                    let totalFormulaMl = 0;
-                    let formulaCount = 0;
-                    let totalPechoMin = 0;
-                    let pechoCount = 0;
-
-                    let pipiCount = 0;
-                    let popoCount = 0;
-                    let ambosPanalesCount = 0;
-
-                    let saludEvents = [];
-
-                    // 1. Alimentación
+                // 1. Alimentación
+                let offlineAlim = queue.filter(item => item.sheet === "Alimentacion").map(item => item.payload);
+                try {
                     const resAlim = await fetch(API_URL + "?sheet=Alimentacion");
                     const dataAlim = await resAlim.json();
                     if (dataAlim.status === "success") {
-                        const hoyAlim = dataAlim.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
+                        const hoyAlim = dataAlim.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlineAlim);
                         document.getElementById('dash-leche').innerText = hoyAlim.length;
 
                         hoyAlim.forEach(r => {
@@ -1149,12 +1177,30 @@
                             }
                         });
                     }
+                } catch (e) {
+                    console.log("Alim fetch error, using offline only", e);
+                    const hoyAlim = offlineAlim;
+                    document.getElementById('dash-leche').innerText = hoyAlim.length;
+                    hoyAlim.forEach(r => {
+                        if (r.Tipo === "Fórmula") {
+                            formulaCount++;
+                            const ml = parseInt(r.Detalle);
+                            if (!isNaN(ml)) totalFormulaMl += ml;
+                        } else if (r.Tipo === "Pecho") {
+                            pechoCount++;
+                            const mins = parseInt(r.Detalle);
+                            if (!isNaN(mins)) totalPechoMin += mins;
+                        }
+                    });
+                }
 
-                    // 2. Pañales
+                // 2. Pañales
+                let offlinePan = queue.filter(item => item.sheet === "Panales").map(item => item.payload);
+                try {
                     const resPan = await fetch(API_URL + "?sheet=Panales");
                     const dataPan = await resPan.json();
                     if (dataPan.status === "success") {
-                        const hoyPan = dataPan.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
+                        const hoyPan = dataPan.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlinePan);
                         document.getElementById('dash-panal').innerText = hoyPan.length;
 
                         hoyPan.forEach(r => {
@@ -1163,42 +1209,58 @@
                             else ambosPanalesCount++;
                         });
                     }
+                } catch (e) {
+                    console.log("Panales fetch error, using offline only", e);
+                    const hoyPan = offlinePan;
+                    document.getElementById('dash-panal').innerText = hoyPan.length;
+                    hoyPan.forEach(r => {
+                        if (r.Tipo === "Pipí") pipiCount++;
+                        else if (r.Tipo === "Popó") popoCount++;
+                        else ambosPanalesCount++;
+                    });
+                }
 
-                    // 3. Salud
+                // 3. Salud
+                let offlineSal = queue.filter(item => item.sheet === "Salud_Sueno").map(item => item.payload);
+                try {
                     const resSal = await fetch(API_URL + "?sheet=Salud_Sueno");
                     const dataSal = await resSal.json();
                     if (dataSal.status === "success") {
-                        const hoySal = dataSal.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
+                        const hoySal = dataSal.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlineSal);
                         document.getElementById('dash-salud').innerText = hoySal.length;
 
                         hoySal.forEach(r => {
                             saludEvents.push(`• ${r.Categoria}: ${r.Detalle} ${r.Valor !== '-' ? '| ' + r.Valor : ''}`);
                         });
                     }
-
-                    // Actualizar reporte en pantalla
-                    document.getElementById('rep-formula-ml').innerText = totalFormulaMl;
-                    document.getElementById('rep-formula-tomas').innerText = formulaCount;
-                    document.getElementById('rep-pecho-min').innerText = totalPechoMin;
-                    document.getElementById('rep-pecho-tomas').innerText = pechoCount;
-
-                    document.getElementById('rep-pipi').innerText = pipiCount;
-                    document.getElementById('rep-popo').innerText = popoCount;
-                    document.getElementById('rep-ambos-panal').innerText = ambosPanalesCount;
-
-                    const saludContainer = document.getElementById('rep-salud-lista');
-                    if (saludEvents.length > 0) {
-                        saludContainer.innerHTML = saludEvents.join('<br>');
-                    } else {
-                        saludContainer.innerHTML = 'Sin novedades registradas hoy.';
-                    }
-
-                    // Construir texto para enviar a WhatsApp
-                    todayReportText = `📊 *Reporte Diario de Aziel*\n📅 Fecha: ${hoyStr}\n\n🍼 *Alimentación:*\n• Fórmula: ${totalFormulaMl} ml en total (${formulaCount} tomas)\n• Pecho: ${totalPechoMin} mins en total (${pechoCount} tomas)\n\n🧻 *Pañales:*\n• Pipí: ${pipiCount}\n• Popó: ${popoCount}\n• Ambos: ${ambosPanalesCount}\n\n🩺 *Salud y Bienestar:*\n${saludEvents.length > 0 ? saludEvents.join('\n') : '• Sin novedades'}\n\n_Enviado desde Aziel App_`;
-
                 } catch (e) {
-                    console.log("Dashboard fetch error", e);
+                    console.log("Salud fetch error, using offline only", e);
+                    const hoySal = offlineSal;
+                    document.getElementById('dash-salud').innerText = hoySal.length;
+                    hoySal.forEach(r => {
+                        saludEvents.push(`• ${r.Categoria}: ${r.Detalle} ${r.Valor !== '-' ? '| ' + r.Valor : ''}`);
+                    });
                 }
+
+                // Actualizar reporte en pantalla
+                document.getElementById('rep-formula-ml').innerText = totalFormulaMl;
+                document.getElementById('rep-formula-tomas').innerText = formulaCount;
+                document.getElementById('rep-pecho-min').innerText = totalPechoMin;
+                document.getElementById('rep-pecho-tomas').innerText = pechoCount;
+
+                document.getElementById('rep-pipi').innerText = pipiCount;
+                document.getElementById('rep-popo').innerText = popoCount;
+                document.getElementById('rep-ambos-panal').innerText = ambosPanalesCount;
+
+                const saludContainer = document.getElementById('rep-salud-lista');
+                if (saludEvents.length > 0) {
+                    saludContainer.innerHTML = saludEvents.join('<br>');
+                } else {
+                    saludContainer.innerHTML = 'Sin novedades registradas hoy.';
+                }
+
+                // Construir texto para enviar a WhatsApp
+                todayReportText = `📊 *Reporte Diario de Aziel*\n📅 Fecha: ${hoyStr}\n\n🍼 *Alimentación:*\n• Fórmula: ${totalFormulaMl} ml en total (${formulaCount} tomas)\n• Pecho: ${totalPechoMin} mins en total (${pechoCount} tomas)\n\n🧻 *Pañales:*\n• Pipí: ${pipiCount}\n• Popó: ${popoCount}\n• Ambos: ${ambosPanalesCount}\n\n🩺 *Salud y Bienestar:*\n${saludEvents.length > 0 ? saludEvents.join('\n') : '• Sin novedades'}\n\n_Enviado desde Aziel App_`;
             }
 
             function shareDailyReport() {
