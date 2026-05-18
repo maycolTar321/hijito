@@ -1098,6 +1098,23 @@
 
             const API_URL = "https://script.google.com/macros/s/AKfycbyREObiaMZsaAiVKOwXeVklMaXiQi_3ZT76kL7fx9sdAZCC60AOt9ZTCtpZDwlN974F/exec";
 
+            function translateSheet(sheetName) {
+                if (sheetName === 'Panales') return 'Pañales';
+                if (sheetName === 'Salud_Sueno') return 'Salud_Sueño';
+                return sheetName;
+            }
+
+            function getVal(obj, key) {
+                if (!obj) return undefined;
+                if (obj[key] !== undefined) return obj[key];
+                const upperKey = key.toUpperCase();
+                if (obj[upperKey] !== undefined) return obj[upperKey];
+                const lowerKey = key.toLowerCase();
+                if (obj[lowerKey] !== undefined) return obj[lowerKey];
+                const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
+                return foundKey ? obj[foundKey] : undefined;
+            }
+
             let currentAlim = 'Fórmula'; let currentSeno = 'Izquierdo';
             let currentPanal = 'Pipí'; let currentSalud = 'Medicina';
             let currentUser = '';
@@ -1157,22 +1174,24 @@
                 } catch(e) {}
 
                 // 1. Alimentación
-                let offlineAlim = queue.filter(item => item.sheet === "Alimentacion").map(item => item.payload);
+                let offlineAlim = queue.filter(item => translateSheet(item.sheet) === translateSheet("Alimentacion")).map(item => item.payload);
                 try {
-                    const resAlim = await fetch(API_URL + "?sheet=Alimentacion");
+                    const resAlim = await fetch(API_URL + "?sheet=" + encodeURIComponent(translateSheet("Alimentacion")));
                     const dataAlim = await resAlim.json();
                     if (dataAlim.status === "success") {
-                        const hoyAlim = dataAlim.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlineAlim);
+                        const hoyAlim = dataAlim.data.filter(r => esHoy(getVal(r, 'Fecha_Hora'))).concat(offlineAlim);
                         document.getElementById('dash-leche').innerText = hoyAlim.length;
 
                         hoyAlim.forEach(r => {
-                            if (r.Tipo === "Fórmula") {
+                            const tipo = getVal(r, 'Tipo');
+                            const detalle = getVal(r, 'Detalle');
+                            if (tipo === "Fórmula") {
                                 formulaCount++;
-                                const ml = parseInt(r.Detalle);
+                                const ml = parseInt(detalle);
                                 if (!isNaN(ml)) totalFormulaMl += ml;
-                            } else if (r.Tipo === "Pecho") {
+                            } else if (tipo === "Pecho") {
                                 pechoCount++;
-                                const mins = parseInt(r.Detalle);
+                                const mins = parseInt(detalle);
                                 if (!isNaN(mins)) totalPechoMin += mins;
                             }
                         });
@@ -1182,30 +1201,33 @@
                     const hoyAlim = offlineAlim;
                     document.getElementById('dash-leche').innerText = hoyAlim.length;
                     hoyAlim.forEach(r => {
-                        if (r.Tipo === "Fórmula") {
+                        const tipo = getVal(r, 'Tipo');
+                        const detalle = getVal(r, 'Detalle');
+                        if (tipo === "Fórmula") {
                             formulaCount++;
-                            const ml = parseInt(r.Detalle);
+                            const ml = parseInt(detalle);
                             if (!isNaN(ml)) totalFormulaMl += ml;
-                        } else if (r.Tipo === "Pecho") {
+                        } else if (tipo === "Pecho") {
                             pechoCount++;
-                            const mins = parseInt(r.Detalle);
+                            const mins = parseInt(detalle);
                             if (!isNaN(mins)) totalPechoMin += mins;
                         }
                     });
                 }
 
                 // 2. Pañales
-                let offlinePan = queue.filter(item => item.sheet === "Panales").map(item => item.payload);
+                let offlinePan = queue.filter(item => translateSheet(item.sheet) === translateSheet("Panales")).map(item => item.payload);
                 try {
-                    const resPan = await fetch(API_URL + "?sheet=Panales");
+                    const resPan = await fetch(API_URL + "?sheet=" + encodeURIComponent(translateSheet("Panales")));
                     const dataPan = await resPan.json();
                     if (dataPan.status === "success") {
-                        const hoyPan = dataPan.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlinePan);
+                        const hoyPan = dataPan.data.filter(r => esHoy(getVal(r, 'Fecha_Hora'))).concat(offlinePan);
                         document.getElementById('dash-panal').innerText = hoyPan.length;
 
                         hoyPan.forEach(r => {
-                            if (r.Tipo === "Pipí") pipiCount++;
-                            else if (r.Tipo === "Popó") popoCount++;
+                            const tipo = getVal(r, 'Tipo');
+                            if (tipo === "Pipí") pipiCount++;
+                            else if (tipo === "Popó") popoCount++;
                             else ambosPanalesCount++;
                         });
                     }
@@ -1214,23 +1236,27 @@
                     const hoyPan = offlinePan;
                     document.getElementById('dash-panal').innerText = hoyPan.length;
                     hoyPan.forEach(r => {
-                        if (r.Tipo === "Pipí") pipiCount++;
-                        else if (r.Tipo === "Popó") popoCount++;
+                        const tipo = getVal(r, 'Tipo');
+                        if (tipo === "Pipí") pipiCount++;
+                        else if (tipo === "Popó") popoCount++;
                         else ambosPanalesCount++;
                     });
                 }
 
                 // 3. Salud
-                let offlineSal = queue.filter(item => item.sheet === "Salud_Sueno").map(item => item.payload);
+                let offlineSal = queue.filter(item => translateSheet(item.sheet) === translateSheet("Salud_Sueno")).map(item => item.payload);
                 try {
-                    const resSal = await fetch(API_URL + "?sheet=Salud_Sueno");
+                    const resSal = await fetch(API_URL + "?sheet=" + encodeURIComponent(translateSheet("Salud_Sueno")));
                     const dataSal = await resSal.json();
                     if (dataSal.status === "success") {
-                        const hoySal = dataSal.data.filter(r => esHoy(r.Fecha_Hora)).concat(offlineSal);
+                        const hoySal = dataSal.data.filter(r => esHoy(getVal(r, 'Fecha_Hora'))).concat(offlineSal);
                         document.getElementById('dash-salud').innerText = hoySal.length;
 
                         hoySal.forEach(r => {
-                            saludEvents.push(`• ${r.Categoria}: ${r.Detalle} ${r.Valor !== '-' ? '| ' + r.Valor : ''}`);
+                            const cat = getVal(r, 'Categoria');
+                            const det = getVal(r, 'Detalle');
+                            const val = getVal(r, 'Valor');
+                            saludEvents.push(`• ${cat}: ${det} ${val !== '-' ? '| ' + val : ''}`);
                         });
                     }
                 } catch (e) {
@@ -1238,7 +1264,10 @@
                     const hoySal = offlineSal;
                     document.getElementById('dash-salud').innerText = hoySal.length;
                     hoySal.forEach(r => {
-                        saludEvents.push(`• ${r.Categoria}: ${r.Detalle} ${r.Valor !== '-' ? '| ' + r.Valor : ''}`);
+                        const cat = getVal(r, 'Categoria');
+                        const det = getVal(r, 'Detalle');
+                        const val = getVal(r, 'Valor');
+                        saludEvents.push(`• ${cat}: ${det} ${val !== '-' ? '| ' + val : ''}`);
                     });
                 }
 
@@ -1450,7 +1479,8 @@
 
             async function enviarDatos(sheetName, payload) {
                 document.getElementById('loader').classList.add('show');
-                const requestData = { sheet: sheetName, payload: payload };
+                const realSheet = translateSheet(sheetName);
+                const requestData = { sheet: realSheet, payload: payload };
                 try {
                     await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(requestData) });
                     showToast("Guardado con éxito");
@@ -1518,28 +1548,39 @@
                 content.innerHTML = '<div style="text-align:center; padding: 20px;"><div class="spinner" style="margin:0 auto;"></div></div>';
 
                 try {
-                    const response = await fetch(API_URL + "?sheet=" + sheet);
+                    const realSheet = translateSheet(sheet);
+                    const response = await fetch(API_URL + "?sheet=" + encodeURIComponent(realSheet));
                     const result = await response.json();
                     if (result.status === "success" && result.data.length > 0) {
                         content.innerHTML = '';
                         const reversedData = result.data.reverse().slice(0, 30);
                         reversedData.forEach(row => {
                             let title = "", desc = "", icon = "";
-                            if (sheet === 'Alimentacion') { icon = '🍼'; title = row.Tipo; desc = row.Detalle; }
-                            else if (sheet === 'Panales') { icon = '🧻'; title = row.Tipo; desc = row.Notas; }
-                            else { icon = '🩺'; title = row.Categoria; desc = `${row.Detalle} | ${row.Valor}`; }
+                            if (sheet === 'Alimentacion') {
+                                icon = '🍼';
+                                title = getVal(row, 'Tipo') || "-";
+                                desc = getVal(row, 'Detalle') || "-";
+                            } else if (sheet === 'Panales') {
+                                icon = '🧻';
+                                title = getVal(row, 'Tipo') || "-";
+                                desc = getVal(row, 'Notas') || "-";
+                            } else {
+                                icon = '🩺';
+                                title = getVal(row, 'Categoria') || "-";
+                                desc = `${getVal(row, 'Detalle') || "-"} | ${getVal(row, 'Valor') || "-"}`;
+                            }
 
-                            const safeTitle = title.replace(/'/g, "\\'");
-                            const safeDesc = desc.replace(/'/g, "\\'");
-                            const safeTime = row.Fecha_Hora.replace(/'/g, "\\'");
+                            const safeTitle = String(title).replace(/'/g, "\\'");
+                            const safeDesc = String(desc).replace(/'/g, "\\'");
+                            const safeTime = String(getVal(row, 'Fecha_Hora') || "-").replace(/'/g, "\\'");
 
                             content.innerHTML += `
                             <div class="history-item">
-                                <div class="h-time">${row.Fecha_Hora}</div>
+                                <div class="h-time">${getVal(row, 'Fecha_Hora') || "-"}</div>
                                 <div class="h-title"><span style="font-size:1.4rem">${icon}</span> ${title}</div>
                                 <div class="h-desc">${desc}</div>
                                 <div class="h-footer">
-                                    <div class="h-user"><i class="fa-regular fa-user"></i> ${row.Registrado_Por}</div>
+                                    <div class="h-user"><i class="fa-regular fa-user"></i> ${getVal(row, 'Registrado_Por') || "-"}</div>
                                     <button class="btn-wa-share" onclick="openWA('${safeTitle}', '${safeDesc}', '${safeTime}')">
                                         <i class="fa-brands fa-whatsapp" style="font-size:1.2rem"></i> Avisar
                                     </button>

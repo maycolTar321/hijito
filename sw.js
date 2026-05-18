@@ -1,4 +1,4 @@
-const CACHE_NAME = 'super-aziel-v3';
+const CACHE_NAME = 'super-aziel-v4';
 const urlsToCache = [
   './index.html',
   './manifest.json'
@@ -29,6 +29,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Ignorar peticiones a Google Apps Script / APIs externas de datos (nunca cachear)
+  if (event.request.url.includes('script.google.com') || event.request.url.includes('exec')) {
+    return event.respondWith(fetch(event.request));
+  }
+
   // Solo aplicar network-first a peticiones locales/propias del PWA
   if (event.request.mode === 'navigate' || event.request.url.includes(self.location.origin)) {
     event.respondWith(
@@ -47,7 +52,7 @@ self.addEventListener('fetch', event => {
         })
     );
   } else {
-    // Para otras peticiones (como la API de Google Apps Script), responder normal
+    // Para otros assets estáticos externos, usar caché o red
     event.respondWith(
       caches.match(event.request).then(response => {
         return response || fetch(event.request);
