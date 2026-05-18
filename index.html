@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="manifest.json">
+
+    <title>Aziel Tracker</title>
+    <!-- Fuente Moderna y Limpia -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Paleta Premium neo-glassmorphism con acentos sutiles de Mario */
+            --bg-color: #f4f7f6;
+            --primary: #4A90E2;
+            /* Azul Mario suave */
+            --danger: #FF5A5F;
+            /* Rojo Mario suave */
+            --success: #34C759;
+            /* Verde Luigi suave */
+            --warning: #FFB300;
+            /* Dorado Moneda */
+
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+
+            --text-dark: #2C3E50;
+            --text-muted: #7F8C8D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Fondo de malla moderna súper suave */
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(74, 144, 226, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 90, 95, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px 120px 15px;
+            overflow-x: hidden;
+        }
+
+        /* HEADER PREMIUM */
+        header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px 5px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .user-badge {
+            background: #FFF;
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .user-badge:active {
+            transform: scale(0.95);
+        }
+
+        /* DASHBOARD / REPORTE EN PANTALLA */
+        .dashboard {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .dash-card {
+            flex: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+            transition: 0.3s;
+        }
+
+        .dash-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .dash-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+
+        .dash-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* NAVEGACIÓN INFERIOR (APPLE STYLE) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 5px 25px 5px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: #A0AAB5;
+            cursor: pointer;
+            transition: 0.3s;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            transition: 0.3s;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-4px);
+        }
+
+        /* PANTALLAS */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CARDS MODERNAS */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .bg-blue {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary);
+        }
+
+        .bg-red {
+            background: rgba(255, 90, 95, 0.1);
+            color: var(--danger);
+        }
+
+        .bg-green {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+
+        .bg-gold {
+            background: rgba(255, 179, 0, 0.1);
+            color: var(--warning);
+        }
+
+        /* BOTONES ELEGANTES */
+        .btn-sleek {
+            background: #FFF;
+            color: var(--text-muted);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .btn-sleek:active {
+            transform: scale(0.96);
+        }
+
+        .btn-sleek.active-blue {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-sleek.active-red {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            box-shadow: 0 6px 15px rgba(255, 90, 95, 0.3);
+        }
+
+        .btn-sleek.active-green {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+            box-shadow: 0 6px 15px rgba(52, 199, 89, 0.3);
+        }
+
+        /* FORMULARIOS MODERNOS */
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-left: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="time"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-dark);
+            padding: 15px 18px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #FFF;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn-sleek {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tag:active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 20px;
+            border: none;
+        }
+
+        /* AGENDA Y RECORDATORIOS */
+        .schedule-adder {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 20px;
+            align-items: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .schedule-adder input[type="time"],
+        .schedule-adder select {
+            flex: 1;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            background: white;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-add {
+            background: var(--text-dark);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            color: #FFF;
+            font-size: 1.5rem;
+            font-weight: 300;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-add:active {
+            transform: scale(0.9);
+        }
+
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sched-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 16px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            transition: 0.3s;
+        }
+
+        .sched-item.done {
+            opacity: 0.5;
+        }
+
+        .sched-time {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .sched-type {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .sched-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action:active {
+            transform: scale(0.9);
+        }
+
+        .btn-action.del {
+            background: rgba(255, 90, 95, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-action.wa {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+
+        /* HISTORIAL */
+        .history-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 20px;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .h-time {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .h-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .h-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .h-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .h-user {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-wa-share {
+            background: none;
+            border: none;
+            color: var(--success);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        /* WHATSAPP MODAL */
+        #wa-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 6000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        #wa-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .wa-box {
+            background: white;
+            border-radius: 30px 30px 0 0;
+            padding: 30px 25px 40px 25px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+            transform: translateY(100%);
+            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        #wa-modal.show .wa-box {
+            transform: translateY(0);
+        }
+
+        .wa-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            margin: 0 auto 15px auto;
+        }
+
+        .btn-contact {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background: #F8F9FA;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-dark);
+        }
+
+        .btn-contact:active {
+            background: #E9ECEF;
+            transform: scale(0.98);
+        }
+
+        .btn-close-wa {
+            background: none;
+            color: var(--text-muted);
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        /* LOGIN SCREEN */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 7000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: 0.5s ease;
+        }
+
+        #login-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.05);
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 40px;
+            padding: 50px 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            justify-content: center;
+        }
+
+        .login-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            border: none;
+        }
+
+        /* LOADER & TOAST */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 8000;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+            flex-direction: column;
+        }
+
+        #loader.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 0, 0, 0.05);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-dark);
+            color: #FFF;
+            padding: 16px 30px;
+            border-radius: 50px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MODAL WHATSAPP -->
+    <div id="wa-modal">
+        <div class="wa-box">
+            <div class="wa-icon"><i class="fa-brands fa-whatsapp"></i></div>
+            <h2 style="margin-bottom: 8px; font-size: 1.4rem; color: var(--text-dark);">Enviar a WhatsApp</h2>
+            <p style="margin-bottom: 25px; font-size: 0.95rem; color: var(--text-muted);">Selecciona el contacto para
+                notificar.</p>
+            <input type="hidden" id="wa-msg-hidden">
+            <div id="wa-buttons-container">
+                <!-- Se inyectan dinámicamente según el perfil activo -->
+            </div>
+            <button class="btn-close-wa" onclick="closeWA()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>Aziel</h1>
+            <p style="color: var(--text-muted); margin-bottom: 35px; font-size: 0.95rem;">App de Cuidados Premium</p>
+            <button class="btn-sleek login-btn active-red" onclick="login('Mamá')">👩🏻 Mamá</button>
+            <button class="btn-sleek login-btn active-blue" onclick="login('Papá')">👨🏻 Papá</button>
+            <button class="btn-sleek login-btn active-green" onclick="login('Niñera')">🧑🏽‍⚕️ Niñera</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>☁️ Aziel</h1>
+        <div class="user-badge" onclick="logout()">
+            <i class="fa-regular fa-user"></i> <span id="current-user-name">...</span>
+        </div>
+    </header>
+
+    <!-- DASHBOARD: REPORTE EN PANTALLA -->
+    <div class="dashboard">
+        <div class="dash-card">
+            <div class="dash-icon">🍼</div>
+            <div class="dash-val" id="dash-leche">0</div>
+            <div class="dash-label">Tomas Hoy</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-icon">🧻</div>
+            <div class="dash-val" id="dash-panal">0</div>
+            <div class="dash-label">Pañales Hoy</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-icon">🩺</div>
+            <div class="dash-val" id="dash-salud">0</div>
+            <div class="dash-label">Salud Hoy</div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchScreen('home', this)">
+            <i class="fa-regular fa-clock"></i><span>Agenda</span>
+        </div>
+        <div class="nav-item" onclick="switchScreen('leche', this)">
+            <i class="fa-solid fa-bottle-water"></i><span>Leche</span>
+        </div>
+        <div class="nav-item" onclick="switchScreen('panales', this)">
+            <i class="fa-solid fa-baby"></i><span>Pañal</span>
+        </div>
+        <div class="nav-item" onclick="switchScreen('salud', this)">
+            <i class="fa-regular fa-heart"></i><span>Salud</span>
+        </div>
+        <div class="nav-item" onclick="switchScreen('historial', this); loadHistory('Alimentacion', null)">
+            <i class="fa-solid fa-list-ul"></i><span>Récords</span>
+        </div>
+    </nav>
+
+    <!-- ================= PANTALLA 1: AGENDA Y RECORDATORIOS ================= -->
+    <div id="screen-home" class="screen active">
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    <div class="card-icon bg-gold">⏰</div> Próximas Tomas
+                </h2>
+            </div>
+
+            <div class="schedule-adder">
+                <input type="time" id="sched-time">
+                <select id="sched-type">
+                    <option value="Fórmula">Fórmula</option>
+                    <option value="Pecho">Pecho</option>
+                </select>
+                <button class="btn-add" onclick="addSchedule()"><i class="fa-solid fa-plus"></i></button>
+                <div class="schedule-list" id="schedule-list">
+                    <!-- Se inyectan por JS -->
+                </div>
+            </div>
+
+            <!-- REPORTE DIARIO EN PANTALLA -->
+            <div class="card" style="margin-top: 10px;">
+                <div class="card-header">
+                    <h2>
+                        <div class="card-icon bg-blue">📊</div> Resumen de Hoy
+                    </h2>
+                    <button class="btn-sleek" onclick="fetchDashboardStats()"
+                        style="padding: 8px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;"><i
+                            class="fa-solid fa-arrows-rotate"></i> Actualizar</button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Detalle Alimentación -->
+                    <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 5px; color: var(--primary);">🍼
+                            Alimentación</h3>
+                        <p style="font-size: 0.95rem; font-weight: 500;">Fórmula: <strong id="rep-formula-ml">0</strong>
+                            ml (<span id="rep-formula-tomas">0</span> tomas)</p>
+                        <p style="font-size: 0.95rem; font-weight: 500;">Pecho: <strong id="rep-pecho-min">0</strong>
+                            mins (<span id="rep-pecho-tomas">0</span> tomas)</p>
+                    </div>
+
+                    <!-- Detalle Pañales -->
+                    <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 5px; color: var(--danger);">🧻
+                            Pañales</h3>
+                        <p style="font-size: 0.95rem; font-weight: 500;">Pipí: <strong id="rep-pipi">0</strong> | Popó:
+                            <strong id="rep-popo">0</strong> | Ambos: <strong id="rep-ambos-panal">0</strong></p>
+                    </div>
+
+                    <!-- Detalle Salud -->
+                    <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 5px; color: var(--success);">🩺
+                            Salud y Medicación</h3>
+                        <p id="rep-salud-lista" style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">
+                            Sin novedades registradas hoy.</p>
+                    </div>
+
+                    <!-- Botón Compartir Reporte por WhatsApp -->
+                    <button class="btn-sleek active-green" onclick="shareDailyReport()"
+                        style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 16px; margin-top: 5px;">
+                        <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i> Compartir Reporte por WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANTALLA 2: LECHE ================= -->
+        <div id="screen-leche" class="screen">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <div class="card-icon bg-blue">🍼</div> Alimentación
+                    </h2>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-sleek active-blue" id="btn-formula"
+                        onclick="setAlimTipo('Fórmula')">Fórmula</button>
+                    <button type="button" class="btn-sleek" id="btn-pecho" onclick="setAlimTipo('Pecho')">Pecho</button>
+                    <button type="button" class="btn-sleek" id="btn-extraccion"
+                        onclick="setAlimTipo('Extracción')">Extracción</button>
+                </div>
+
+                <div class="sub-group" id="pecho-opciones" style="display:none;">
+                    <button type="button" class="btn-sleek" id="btn-izq"
+                        onclick="setSeno('Izquierdo', this)">Izquierdo</button>
+                    <button type="button" class="btn-sleek" id="btn-der"
+                        onclick="setSeno('Derecho', this)">Derecho</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label id="lbl-alim-detalle">Cantidad (ml)</label>
+                        <input type="number" id="alim-detalle" placeholder="Ej. 45" inputmode="decimal">
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Pasada</label>
+                        <input type="time" id="alim-hora">
+                    </div>
+                </div>
+
+                <div class="tags-container" id="alim-tags">
+                    <div class="tag" onclick="quickFillAlim('15')">+15 ml</div>
+                    <div class="tag" onclick="quickFillAlim('30')">+30 ml</div>
+                    <div class="tag" onclick="quickFillAlim('45')">+45 ml</div>
+                    <div class="tag" onclick="quickFillAlim('60')">+60 ml</div>
+                </div>
+
+                <button class="btn-submit btn-sleek active-blue" onclick="submitAlimentacion()">Guardar
+                    Registro</button>
+            </div>
+        </div>
+
+        <!-- ================= PANTALLA 3: PAÑALES ================= -->
+        <div id="screen-panales" class="screen">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <div class="card-icon bg-red">🧻</div> Pañal
+                    </h2>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-sleek active-red"
+                        onclick="setPanalTipo('Pipí', this)">Pipí</button>
+                    <button type="button" class="btn-sleek" onclick="setPanalTipo('Popó', this)">Popó</button>
+                    <button type="button" class="btn-sleek" onclick="setPanalTipo('Ambos', this)">Ambos</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Diagnóstico Rápido</label>
+                    <div class="tags-container">
+                        <div class="tag" onclick="addNota('Normal')">Normal</div>
+                        <div class="tag" onclick="addNota('Mostaza')">Mostaza</div>
+                        <div class="tag" onclick="addNota('Oscuro')">Oscuro</div>
+                        <div class="tag" onclick="addNota('Líquido')">Líquido</div>
+                        <div class="tag" onclick="addNota('Duro')">Duro</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Observaciones</label>
+                        <input type="text" id="panal-notas" placeholder="Ej. Rozadura leve">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Hora</label>
+                        <input type="time" id="panal-hora">
+                    </div>
+                </div>
+                <button class="btn-submit btn-sleek active-red" onclick="submitPanal()">Guardar Registro</button>
+            </div>
+        </div>
+
+        <!-- ================= PANTALLA 4: SALUD ================= -->
+        <div id="screen-salud" class="screen">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <div class="card-icon bg-green">🩺</div> Bienestar
+                    </h2>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-sleek active-green"
+                        onclick="setSaludCat('Medicina', this)">Medicina</button>
+                    <button type="button" class="btn-sleek" onclick="setSaludCat('Temperatura', this)">Fiebre</button>
+                    <button type="button" class="btn-sleek" onclick="setSaludCat('Sueño', this)">Sueño</button>
+                    <button type="button" class="btn-sleek" onclick="setSaludCat('Baño', this)">Baño</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label id="lbl-salud-detalle">Aplicación</label>
+                        <input type="text" id="salud-detalle" placeholder="Ej. Paracetamol">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label id="lbl-salud-valor">Dosis</label>
+                        <input type="text" id="salud-valor" placeholder="Ej. 2ml">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas Extra</label>
+                    <input type="text" id="salud-notas" placeholder="Ej. Vitaminas adicionales">
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" id="salud-hora">
+                </div>
+                <button class="btn-submit btn-sleek active-green" onclick="submitSalud()">Guardar Registro</button>
+            </div>
+        </div>
+
+        <!-- ================= PANTALLA 5: HISTORIAL ================= -->
+        <div id="screen-historial" class="screen">
+            <div class="card" style="padding: 20px;">
+                <div class="history-tabs">
+                    <button class="btn-sleek active-blue" id="tab-leche"
+                        onclick="loadHistory('Alimentacion', this)">Leche</button>
+                    <button class="btn-sleek" onclick="loadHistory('Panales', this)">Pañal</button>
+                    <button class="btn-sleek" onclick="loadHistory('Salud_Sueno', this)">Salud</button>
+                </div>
+                <div class="history-list" id="history-content">
+                    <p style="text-align:center; color: #A0AAB5; font-size: 0.9rem; margin-top: 20px;">Cargando datos...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARGA Y ALERTAS -->
+        <div id="loader">
+            <div class="spinner"></div>
+            <h3 style="color:var(--text-dark); margin-top: 20px; font-weight:500;">Guardando...</h3>
+        </div>
+        <div id="toast"><i class="fa-solid fa-circle-check" style="color:#34C759;"></i> <span
+                id="toast-msg">Guardado</span></div>
+
+        <script>
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+
+            const API_URL = "https://script.google.com/macros/s/AKfycbyREObiaMZsaAiVKOwXeVklMaXiQi_3ZT76kL7fx9sdAZCC60AOt9ZTCtpZDwlN974F/exec";
+
+            let currentAlim = 'Fórmula'; let currentSeno = 'Izquierdo';
+            let currentPanal = 'Pipí'; let currentSalud = 'Medicina';
+            let currentUser = '';
+            let todayReportText = "";
+
+            window.onload = () => {
+                const savedUser = localStorage.getItem('babyUser');
+                if (savedUser) login(savedUser);
+                if (Notification.permission !== 'granted' && Notification.permission !== 'denied') Notification.requestPermission();
+
+                renderSchedule();
+                setInterval(checkSchedule, 30000);
+                syncOfflineQueue();
+                fetchDashboardStats(); // Cargar reporte en pantalla de hoy
+            };
+
+            // --- DASHBOARD (REPORTE EN PANTALLA) ---
+            async function fetchDashboardStats() {
+                try {
+                    const hoyStr = new Date().toLocaleDateString('es-ES');
+
+                    let totalFormulaMl = 0;
+                    let formulaCount = 0;
+                    let totalPechoMin = 0;
+                    let pechoCount = 0;
+
+                    let pipiCount = 0;
+                    let popoCount = 0;
+                    let ambosPanalesCount = 0;
+
+                    let saludEvents = [];
+
+                    // 1. Alimentación
+                    const resAlim = await fetch(API_URL + "?sheet=Alimentacion");
+                    const dataAlim = await resAlim.json();
+                    if (dataAlim.status === "success") {
+                        const hoyAlim = dataAlim.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        document.getElementById('dash-leche').innerText = hoyAlim.length;
+
+                        hoyAlim.forEach(r => {
+                            if (r.Tipo === "Fórmula") {
+                                formulaCount++;
+                                const ml = parseInt(r.Detalle);
+                                if (!isNaN(ml)) totalFormulaMl += ml;
+                            } else if (r.Tipo === "Pecho") {
+                                pechoCount++;
+                                const mins = parseInt(r.Detalle);
+                                if (!isNaN(mins)) totalPechoMin += mins;
+                            }
+                        });
+                    }
+
+                    // 2. Pañales
+                    const resPan = await fetch(API_URL + "?sheet=Panales");
+                    const dataPan = await resPan.json();
+                    if (dataPan.status === "success") {
+                        const hoyPan = dataPan.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        document.getElementById('dash-panal').innerText = hoyPan.length;
+
+                        hoyPan.forEach(r => {
+                            if (r.Tipo === "Pipí") pipiCount++;
+                            else if (r.Tipo === "Popó") popoCount++;
+                            else ambosPanalesCount++;
+                        });
+                    }
+
+                    // 3. Salud
+                    const resSal = await fetch(API_URL + "?sheet=Salud_Sueno");
+                    const dataSal = await resSal.json();
+                    if (dataSal.status === "success") {
+                        const hoySal = dataSal.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        document.getElementById('dash-salud').innerText = hoySal.length;
+
+                        hoySal.forEach(r => {
+                            saludEvents.push(`• ${r.Categoria}: ${r.Detalle} ${r.Valor !== '-' ? '| ' + r.Valor : ''}`);
+                        });
+                    }
+
+                    // Actualizar reporte en pantalla
+                    document.getElementById('rep-formula-ml').innerText = totalFormulaMl;
+                    document.getElementById('rep-formula-tomas').innerText = formulaCount;
+                    document.getElementById('rep-pecho-min').innerText = totalPechoMin;
+                    document.getElementById('rep-pecho-tomas').innerText = pechoCount;
+
+                    document.getElementById('rep-pipi').innerText = pipiCount;
+                    document.getElementById('rep-popo').innerText = popoCount;
+                    document.getElementById('rep-ambos-panal').innerText = ambosPanalesCount;
+
+                    const saludContainer = document.getElementById('rep-salud-lista');
+                    if (saludEvents.length > 0) {
+                        saludContainer.innerHTML = saludEvents.join('<br>');
+                    } else {
+                        saludContainer.innerHTML = 'Sin novedades registradas hoy.';
+                    }
+
+                    // Construir texto para enviar a WhatsApp
+                    todayReportText = `📊 *Reporte Diario de Aziel*\n📅 Fecha: ${hoyStr}\n\n🍼 *Alimentación:*\n• Fórmula: ${totalFormulaMl} ml en total (${formulaCount} tomas)\n• Pecho: ${totalPechoMin} mins en total (${pechoCount} tomas)\n\n🧻 *Pañales:*\n• Pipí: ${pipiCount}\n• Popó: ${popoCount}\n• Ambos: ${ambosPanalesCount}\n\n🩺 *Salud y Bienestar:*\n${saludEvents.length > 0 ? saludEvents.join('\n') : '• Sin novedades'}\n\n_Enviado desde Aziel App_`;
+
+                } catch (e) {
+                    console.log("Dashboard fetch error", e);
+                }
+            }
+
+            function shareDailyReport() {
+                const hoyStr = new Date().toLocaleDateString('es-ES');
+                const formulaMl = document.getElementById('rep-formula-ml').innerText || "0";
+                const formulaTomas = document.getElementById('rep-formula-tomas').innerText || "0";
+                const pechoMin = document.getElementById('rep-pecho-min').innerText || "0";
+                const pechoTomas = document.getElementById('rep-pecho-tomas').innerText || "0";
+                const pipi = document.getElementById('rep-pipi').innerText || "0";
+                const popo = document.getElementById('rep-popo').innerText || "0";
+                const ambos = document.getElementById('rep-ambos-panal').innerText || "0";
+                let saludText = document.getElementById('rep-salud-lista').innerText || "Sin novedades";
+
+                // Reemplazar saltos de línea para el mensaje
+                saludText = saludText.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ');
+
+                const msg = `📊 *Reporte Diario de Aziel*\n📅 Fecha: ${hoyStr}\n\n🍼 *Alimentación:*\n• Fórmula: ${formulaMl} ml en total (${formulaTomas} tomas)\n• Pecho: ${pechoMin} mins en total (${pechoTomas} tomas)\n\n🧻 *Pañales:*\n• Pipí: ${pipi}\n• Popó: ${popo}\n• Ambos: ${ambos}\n\n🩺 *Salud y Bienestar:*\n${saludText}\n\n_Enviado desde Aziel App_`;
+
+                openWAModal(msg);
+            }
+
+            // --- SISTEMA WHATSAPP ---
+            function openWAModal(msg) {
+                document.getElementById('wa-msg-hidden').value = msg;
+                const container = document.getElementById('wa-buttons-container');
+                container.innerHTML = '';
+
+                if (currentUser === 'Mamá') {
+                    container.innerHTML = `<button class="btn-contact" onclick="sendWhatsApp('59177173169')">👨🏻 Enviar a Maycol (Esposo)</button>`;
+                } else if (currentUser === 'Papá') {
+                    container.innerHTML = `<button class="btn-contact" onclick="sendWhatsApp('59167396562')">👩🏻 Enviar a Melissa (Esposa)</button>`;
+                } else {
+                    container.innerHTML = `
+                    <button class="btn-contact" onclick="sendWhatsApp('59177173169')">👨🏻 Enviar a Maycol (Esposo)</button>
+                    <button class="btn-contact" onclick="sendWhatsApp('59167396562')">👩🏻 Enviar a Melissa (Esposa)</button>
+                `;
+                }
+                document.getElementById('wa-modal').classList.add('show');
+            }
+
+            function openWA(title, desc, time) {
+                const msg = `🍄 *Reporte de Aziel*\n*${title}*\n📝 ${desc}\n⏰ Hora: ${time}\n👤 Por: ${getUser()}\n\n_Enviado desde Aziel App_`;
+                openWAModal(msg);
+            }
+
+            function openWAReminder(time, type) {
+                const msg = `⏰ *¡Recordatorio!*\nEs hora de la toma programada de Aziel:\n🍼 *${type}* a las *${time}*.\n\n_Enviado desde Aziel App_`;
+                openWAModal(msg);
+            }
+
+            function closeWA() { document.getElementById('wa-modal').classList.remove('show'); }
+
+            function sendWhatsApp(phone) {
+                const msg = document.getElementById('wa-msg-hidden').value;
+                window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
+                closeWA();
+            }
+
+            // --- SISTEMA DE HORARIOS MULTIPLES ---
+            let schedule = JSON.parse(localStorage.getItem('azielSchedule') || "[]");
+
+            function addSchedule() {
+                if (Notification.permission !== 'granted') Notification.requestPermission();
+                const time = document.getElementById('sched-time').value;
+                const type = document.getElementById('sched-type').value;
+                if (!time) return;
+                if (schedule.some(s => s.time === time && s.type === type && !s.done)) return showToast("Hora ya agregada");
+
+                schedule.push({ id: Date.now(), time: time, type: type, done: false, notified: false });
+                schedule.sort((a, b) => a.time.localeCompare(b.time));
+                localStorage.setItem('azielSchedule', JSON.stringify(schedule));
+                document.getElementById('sched-time').value = '';
+                renderSchedule();
+            }
+
+            function removeSchedule(id) {
+                schedule = schedule.filter(s => s.id !== id);
+                localStorage.setItem('azielSchedule', JSON.stringify(schedule));
+                renderSchedule();
+            }
+
+            function renderSchedule() {
+                const list = document.getElementById('schedule-list');
+                list.innerHTML = '';
+                if (schedule.length === 0) { list.innerHTML = '<p style="text-align:center; color:#A0AAB5; font-size:0.9rem;">No hay tomas programadas.</p>'; return; }
+
+                schedule.forEach(s => {
+                    let [h, m] = s.time.split(':');
+                    let ampm = h >= 12 ? 'PM' : 'AM';
+                    h = h % 12 || 12;
+                    list.innerHTML += `
+                    <div class="sched-item ${s.done ? 'done' : ''}">
+                        <div><div class="sched-time">${h}:${m} ${ampm}</div><div class="sched-type">${s.type}</div></div>
+                        <div class="sched-actions">
+                            <button class="btn-action wa" onclick="openWAReminder('${h}:${m} ${ampm}', '${s.type}')" title="Enviar WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+                            <button class="btn-action del" onclick="removeSchedule(${s.id})" title="Borrar"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                });
+            }
+
+            function checkSchedule() {
+                const now = new Date();
+                schedule.forEach(s => {
+                    if (s.notified || s.done) return;
+                    const [sh, sm] = s.time.split(':');
+                    const sDate = new Date(); sDate.setHours(sh, sm, 0, 0);
+                    const diff = now - sDate;
+
+                    if (diff >= 0 && diff < 30 * 60 * 1000) {
+                        s.notified = true; s.done = true;
+                        localStorage.setItem('azielSchedule', JSON.stringify(schedule));
+                        renderSchedule();
+                        showToast(`¡Toma de ${s.type} AHORA!`);
+                        if (Notification.permission === 'granted') new Notification("🍼 ¡Hora de Comer!", { body: `Toca darle ${s.type}.`, icon: 'android/icon-192.png' });
+                    }
+                });
+            }
+
+            // --- SISTEMA DE PANTALLAS ---
+            function switchScreen(screenName, navElement) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('screen-' + screenName).classList.add('active');
+                navElement.classList.add('active');
+            }
+
+            // --- LOGIN ---
+            function login(role) {
+                currentUser = role; localStorage.setItem('babyUser', role);
+                document.getElementById('current-user-name').innerText = role;
+                document.getElementById('login-screen').classList.add('hidden');
+            }
+            function logout() { if (confirm("¿Cambiar de usuario?")) { localStorage.removeItem('babyUser'); document.getElementById('login-screen').classList.remove('hidden'); } }
+            function getUser() { return currentUser; }
+
+            // --- LÓGICA DE ALIMENTACIÓN ---
+            function setAlimTipo(tipo) {
+                currentAlim = tipo;
+                document.querySelectorAll('#screen-leche .btn-sleek').forEach(b => { if (b.id.startsWith('btn-') && !b.id.includes('izq') && !b.id.includes('der')) b.classList.remove('active-blue') });
+                if (tipo === 'Fórmula') document.getElementById('btn-formula').classList.add('active-blue');
+                if (tipo === 'Pecho') document.getElementById('btn-pecho').classList.add('active-blue');
+                if (tipo === 'Extracción') document.getElementById('btn-extraccion').classList.add('active-blue');
+
+                const subOpciones = document.getElementById('pecho-opciones');
+                const lbl = document.getElementById('lbl-alim-detalle');
+                const input = document.getElementById('alim-detalle');
+                const tags = document.getElementById('alim-tags');
+                if (tipo === 'Pecho') {
+                    subOpciones.style.display = 'flex';
+                    lbl.innerText = 'Tiempo (Minutos)'; input.placeholder = 'Ej. 15';
+                    tags.innerHTML = `<div class="tag" onclick="quickFillAlim('5')">5 min</div><div class="tag" onclick="quickFillAlim('10')">10 min</div><div class="tag" onclick="quickFillAlim('15')">15 min</div><div class="tag" onclick="quickFillAlim('20')">20 min</div>`;
+                    setSeno('Izquierdo', document.getElementById('btn-izq'));
+                } else {
+                    subOpciones.style.display = 'none';
+                    lbl.innerText = 'Cantidad (ml)'; input.placeholder = tipo === 'Fórmula' ? 'Ej. 45' : 'Ej. 120';
+                    tags.innerHTML = `<div class="tag" onclick="quickFillAlim('15')">+15 ml</div><div class="tag" onclick="quickFillAlim('30')">+30 ml</div><div class="tag" onclick="quickFillAlim('45')">+45 ml</div><div class="tag" onclick="quickFillAlim('60')">+60 ml</div>`;
+                }
+                input.value = '';
+            }
+            function setSeno(seno, btn) { currentSeno = seno; document.getElementById('btn-izq').classList.remove('active-blue'); document.getElementById('btn-der').classList.remove('active-blue'); if (btn) btn.classList.add('active-blue'); }
+            function quickFillAlim(val) { const input = document.getElementById('alim-detalle'); if (currentAlim !== 'Pecho' && input.value !== '') { input.value = parseInt(input.value) + parseInt(val); } else { input.value = val; } }
+
+            // --- LÓGICA PAÑALES Y SALUD ---
+            function setPanalTipo(tipo, btnElement) { currentPanal = tipo; document.querySelectorAll('#screen-panales .btn-sleek').forEach(b => b.classList.remove('active-red')); btnElement.classList.add('active-red'); }
+            function addNota(texto) { const input = document.getElementById('panal-notas'); if (input.value.includes(texto)) return; input.value = input.value ? input.value + ", " + texto : texto; }
+
+            function setSaludCat(cat, btnElement) {
+                currentSalud = cat; document.querySelectorAll('#screen-salud .btn-sleek').forEach(b => b.classList.remove('active-green')); btnElement.classList.add('active-green');
+                const lblDetalle = document.getElementById('lbl-salud-detalle'); const lblValor = document.getElementById('lbl-salud-valor');
+                const inputDetalle = document.getElementById('salud-detalle'); const inputValor = document.getElementById('salud-valor');
+                inputDetalle.value = ''; inputValor.value = '';
+                if (cat === 'Medicina') { lblDetalle.innerText = 'Aplicación'; lblValor.innerText = 'Dosis'; inputDetalle.placeholder = 'Ej. Paracetamol'; inputValor.placeholder = 'Ej. 2ml'; }
+                else if (cat === 'Temperatura') { lblDetalle.innerText = 'Momento'; lblValor.innerText = 'Grados (°C)'; inputDetalle.placeholder = 'Ej. Noche'; inputValor.placeholder = 'Ej. 37.5'; }
+                else if (cat === 'Sueño') { lblDetalle.innerText = 'Tipo'; lblValor.innerText = 'Duración'; inputDetalle.placeholder = 'Ej. Siesta'; inputValor.placeholder = 'Ej. 1h 30m'; }
+                else if (cat === 'Baño') { lblDetalle.innerText = 'Detalle'; lblValor.innerText = 'Reacción'; inputDetalle.value = 'Baño regular'; inputValor.value = 'Tranquilo'; }
+            }
+
+            function formatDetalle(baseText, horaInputId) { const h = document.getElementById(horaInputId).value; return h ? `[${h}] ${baseText}` : baseText; }
+
+            // --- OFFLINE SYNC Y GUARDADO ---
+            function showToast(msg) {
+                const toast = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg;
+                toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+
+            async function enviarDatos(sheetName, payload) {
+                document.getElementById('loader').classList.add('show');
+                const requestData = { sheet: sheetName, payload: payload };
+                try {
+                    await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(requestData) });
+                    showToast("Guardado con éxito");
+                    syncOfflineQueue();
+                    fetchDashboardStats();
+                    return true;
+                } catch (error) {
+                    let queue = JSON.parse(localStorage.getItem('babyOfflineQueue') || "[]");
+                    queue.push(requestData); localStorage.setItem('babyOfflineQueue', JSON.stringify(queue));
+                    showToast("Guardado Offline");
+                    return true;
+                } finally { document.getElementById('loader').classList.remove('show'); }
+            }
+
+            async function syncOfflineQueue() {
+                let queue = JSON.parse(localStorage.getItem('babyOfflineQueue') || "[]");
+                if (queue.length === 0) return;
+                let successful = [];
+                for (let i = 0; i < queue.length; i++) {
+                    try { await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(queue[i]) }); successful.push(i); } catch (e) { break; }
+                }
+                if (successful.length > 0) {
+                    queue = queue.filter((_, index) => !successful.includes(index));
+                    localStorage.setItem('babyOfflineQueue', JSON.stringify(queue));
+                    showToast(`Sincronizados ${successful.length} registros offline`);
+                    fetchDashboardStats();
+                }
+            }
+
+            // --- SUBMITS ---
+            async function submitAlimentacion() {
+                let baseDetalle = document.getElementById('alim-detalle').value;
+                if (!baseDetalle) return alert('⚠️ Faltan datos.');
+                if (currentAlim === 'Pecho') { baseDetalle += " min (Seno " + currentSeno + ")"; } else { baseDetalle += " ml"; }
+                const exito = await enviarDatos("Alimentacion", { Tipo: currentAlim, Detalle: formatDetalle(baseDetalle, 'alim-hora'), Registrado_Por: getUser() });
+                if (exito) { document.getElementById('alim-detalle').value = ''; document.getElementById('alim-hora').value = ''; }
+            }
+
+            async function submitPanal() {
+                const baseNotas = document.getElementById('panal-notas').value || "-";
+                const exito = await enviarDatos("Panales", { Tipo: currentPanal, Notas: formatDetalle(baseNotas, 'panal-hora'), Registrado_Por: getUser() });
+                if (exito) { document.getElementById('panal-notas').value = ''; document.getElementById('panal-hora').value = ''; }
+            }
+
+            async function submitSalud() {
+                let baseDetalle = document.getElementById('salud-detalle').value || "-";
+                const valor = document.getElementById('salud-valor').value || "-";
+                const notas = document.getElementById('salud-notas').value;
+                if (valor === "-" && currentSalud !== 'Baño') return alert('⚠️ Falta dosis.');
+                if (notas) { baseDetalle += ` | Notas: ${notas}`; }
+                const exito = await enviarDatos("Salud_Sueno", { Categoria: currentSalud, Detalle: formatDetalle(baseDetalle, 'salud-hora'), Valor: valor, Registrado_Por: getUser() });
+                if (exito) { document.getElementById('salud-detalle').value = ''; document.getElementById('salud-valor').value = ''; document.getElementById('salud-hora').value = ''; document.getElementById('salud-notas').value = ''; }
+            }
+
+            // --- HISTORIAL ---
+            async function loadHistory(sheet, btn) {
+                document.querySelectorAll('#screen-historial .btn-sleek').forEach(b => { b.classList.remove('active-blue'); b.classList.remove('active-red'); b.classList.remove('active-green'); });
+                if (btn) {
+                    if (sheet === 'Alimentacion') btn.classList.add('active-blue');
+                    else if (sheet === 'Panales') btn.classList.add('active-red');
+                    else btn.classList.add('active-green');
+                } else { document.getElementById('tab-leche').classList.add('active-blue'); }
+
+                const content = document.getElementById('history-content');
+                content.innerHTML = '<div style="text-align:center; padding: 20px;"><div class="spinner" style="margin:0 auto;"></div></div>';
+
+                try {
+                    const response = await fetch(API_URL + "?sheet=" + sheet);
+                    const result = await response.json();
+                    if (result.status === "success" && result.data.length > 0) {
+                        content.innerHTML = '';
+                        const reversedData = result.data.reverse().slice(0, 30);
+                        reversedData.forEach(row => {
+                            let title = "", desc = "", icon = "";
+                            if (sheet === 'Alimentacion') { icon = '🍼'; title = row.Tipo; desc = row.Detalle; }
+                            else if (sheet === 'Panales') { icon = '🧻'; title = row.Tipo; desc = row.Notas; }
+                            else { icon = '🩺'; title = row.Categoria; desc = `${row.Detalle} | ${row.Valor}`; }
+
+                            const safeTitle = title.replace(/'/g, "\\'");
+                            const safeDesc = desc.replace(/'/g, "\\'");
+                            const safeTime = row.Fecha_Hora.replace(/'/g, "\\'");
+
+                            content.innerHTML += `
+                            <div class="history-item">
+                                <div class="h-time">${row.Fecha_Hora}</div>
+                                <div class="h-title"><span style="font-size:1.4rem">${icon}</span> ${title}</div>
+                                <div class="h-desc">${desc}</div>
+                                <div class="h-footer">
+                                    <div class="h-user"><i class="fa-regular fa-user"></i> ${row.Registrado_Por}</div>
+                                    <button class="btn-wa-share" onclick="openWA('${safeTitle}', '${safeDesc}', '${safeTime}')">
+                                        <i class="fa-brands fa-whatsapp" style="font-size:1.2rem"></i> Avisar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        });
+                    } else { content.innerHTML = '<p style="text-align:center; color:#A0AAB5; font-size:0.9rem;">No hay records aún.</p>'; }
+                } catch (err) { content.innerHTML = '<p style="text-align:center; color:var(--danger); font-size:0.9rem;">Error de conexión.</p>'; }
+            }
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "Super Aziel",
+  "short_name": "Aziel",
+  "description": "El increíble mundo de Aziel",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#5C94FC",
+  "theme_color": "#E52521",
+  "icons": [
+    {
+      "src": "android/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
