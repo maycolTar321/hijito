@@ -893,13 +893,15 @@
                     <option value="Pecho">Pecho</option>
                 </select>
                 <button class="btn-add" onclick="addSchedule()"><i class="fa-solid fa-plus"></i></button>
-                <div class="schedule-list" id="schedule-list">
-                    <!-- Se inyectan por JS -->
-                </div>
             </div>
 
-            <!-- REPORTE DIARIO EN PANTALLA -->
-            <div class="card" style="margin-top: 10px;">
+            <div class="schedule-list" id="schedule-list">
+                <!-- Se inyectan por JS -->
+            </div>
+        </div>
+
+        <!-- REPORTE DIARIO EN PANTALLA -->
+        <div class="card" style="margin-top: 10px;">
                 <div class="card-header">
                     <h2>
                         <div class="card-icon bg-blue">📊</div> Resumen de Hoy
@@ -1132,7 +1134,7 @@
                     const resAlim = await fetch(API_URL + "?sheet=Alimentacion");
                     const dataAlim = await resAlim.json();
                     if (dataAlim.status === "success") {
-                        const hoyAlim = dataAlim.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        const hoyAlim = dataAlim.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
                         document.getElementById('dash-leche').innerText = hoyAlim.length;
 
                         hoyAlim.forEach(r => {
@@ -1152,7 +1154,7 @@
                     const resPan = await fetch(API_URL + "?sheet=Panales");
                     const dataPan = await resPan.json();
                     if (dataPan.status === "success") {
-                        const hoyPan = dataPan.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        const hoyPan = dataPan.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
                         document.getElementById('dash-panal').innerText = hoyPan.length;
 
                         hoyPan.forEach(r => {
@@ -1166,7 +1168,7 @@
                     const resSal = await fetch(API_URL + "?sheet=Salud_Sueno");
                     const dataSal = await resSal.json();
                     if (dataSal.status === "success") {
-                        const hoySal = dataSal.data.filter(r => r.Fecha_Hora.includes(hoyStr));
+                        const hoySal = dataSal.data.filter(r => r.Fecha_Hora && r.Fecha_Hora.includes(hoyStr));
                         document.getElementById('dash-salud').innerText = hoySal.length;
 
                         hoySal.forEach(r => {
