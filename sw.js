@@ -1,7 +1,8 @@
-const CACHE_NAME = 'super-aziel-v4';
+const CACHE_NAME = 'hijito-baby-tracker-v1';
 const urlsToCache = [
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './logo.png'
 ];
 
 self.addEventListener('install', event => {
@@ -29,12 +30,12 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Ignorar peticiones a Google Apps Script / APIs externas de datos (nunca cachear)
-  if (event.request.url.includes('script.google.com') || event.request.url.includes('exec')) {
+  // Never cache external API/data requests
+  if (event.request.url.includes('script.google.com') || event.request.url.includes('exec') || event.request.url.includes('tile.openstreetmap.org')) {
     return event.respondWith(fetch(event.request));
   }
 
-  // Solo aplicar network-first a peticiones locales/propias del PWA
+  // Network-first for navigate requests, fallback to cache
   if (event.request.mode === 'navigate' || event.request.url.includes(self.location.origin)) {
     event.respondWith(
       fetch(event.request)
@@ -50,9 +51,9 @@ self.addEventListener('fetch', event => {
         .catch(() => {
           return caches.match(event.request);
         })
-    );
+      );
   } else {
-    // Para otros assets estáticos externos, usar caché o red
+    // For other assets, try cache first, fallback to network
     event.respondWith(
       caches.match(event.request).then(response => {
         return response || fetch(event.request);

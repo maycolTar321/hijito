@@ -1,11 +1,11 @@
 {
-  "name": "Super Aziel",
-  "short_name": "Aziel",
-  "description": "El increíble mundo de Aziel",
+  "name": "Hijito - Baby Tracker Premium",
+  "short_name": "Hijito Tracker",
+  "description": "El monitor y registrador de lactancia, pañales y salud más innovador para tu bebé.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#5C94FC",
-  "theme_color": "#E52521",
+  "background_color": "#070D19",
+  "theme_color": "#070D19",
   "icons": [
     {
       "src": "android/icon-192.png",
